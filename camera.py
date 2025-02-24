@@ -9,7 +9,7 @@ import ftplib
 # define host, username, password and port
 HOSTNAME = "78.130.244.248"
 USERNAME = "ivo"
-PASSWORD = "123123"
+PASSWORD = "***"
 PORT = 21
 
 # define pins
