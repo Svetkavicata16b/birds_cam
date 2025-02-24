@@ -6,15 +6,26 @@ from picamera2 import Picamera2, Preview
 import ftplib
 
 
-HOSTNAME = "192.168.2.224"
+# define host, username, password and port
+HOSTNAME = "78.130.244.248"
 USERNAME = "ivo"
-PASSWORD = "123"
+PASSWORD = "123123"
 PORT = 21
 
+# define pins
 LED_PIN = 2
 MOTION_SENSOR_PIN = 5
 
+# init
+led = LED(LED_PIN)
+sleep(5)
+led.off()
+motion = MotionSensor(MOTION_SENSOR_PIN)
+picam2 = Picamera2()
+picam2.start_preview(Preview.NULL)
 
+
+# this is function which determines file’s name  relative to time
 def get_name():
     name = "img_"
     out_format = "%Y%m%d_%H%M%S"
@@ -24,15 +35,17 @@ def get_name():
     return name
 
 
+# capture bird’s image
 def get_img(name):
     picam2.start_and_capture_file(name)
 
 
+# send image to ftp
 def send_to_ftp(name, hostname, username, password, port):
     ftp_server = ftplib.FTP()
     ftp_server.connect(hostname, port)
     ftp_server.login(username, password)
-    ftp_server.cwd("/ivo")
+    ftp_server.cwd("/ivo/imgs")
     
     with open(name, "rb") as file:
         ftp_server.storbinary("STOR {}".format(name), file)
@@ -40,22 +53,12 @@ def send_to_ftp(name, hostname, username, password, port):
     ftp_server.quit()
 
 
-def init():
-    led = LED(LED_PIN)
-    sleep(5)
-    led.off()
-    motion = MotionSensor(MOTION_SENSOR_PIN)
-    picam2 = Picamera2()
-    picam2.start_preview(Preview.NULL)
-
-
+# main function – call other functions to build main loop
 def main():
-    init()
-    
     while True:
         motion.wait_for_motion()
         name = get_name()
-        file_path = "imgs/%s.jpg" % name
+        file_path = "%s.jpg" % name
         
         led.on()
         sleep(1)
@@ -68,5 +71,6 @@ def main():
         sleep(10)
 
 
+# call main function
 if __name__ == "__main__":
     main()
